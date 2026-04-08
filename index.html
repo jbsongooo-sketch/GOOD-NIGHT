@@ -16,8 +16,8 @@ body {
 }
 
 .app {
-  width: 340px;
-  height: 620px;
+  width: 350px;
+  height: 640px;
   background: #1e293b;
   border-radius: 25px;
   padding: 20px;
@@ -55,94 +55,77 @@ input, textarea, select {
 <body>
 
 <div class="app">
-
 <h2>🌙 불면증 해소기</h2>
-
 <div id="screen"></div>
-
 </div>
 
 <script>
 let currentUser = null;
 let audio;
 
-// 🔐 시작 화면
+// 시작
 showLogin();
 
-// 회원가입 화면
-function showRegister() {
-  document.getElementById("screen").innerHTML = `
-    <h3>회원가입</h3>
-    <input id="regId" placeholder="아이디">
-    <input id="regPw" type="password" placeholder="비밀번호">
-    <button onclick="register()">가입하기</button>
-    <button onclick="showLogin()">← 로그인</button>
-  `;
-}
-
-// 로그인 화면
+// 🔐 로그인
 function showLogin() {
   document.getElementById("screen").innerHTML = `
     <h3>로그인</h3>
-    <input id="loginId" placeholder="아이디">
-    <input id="loginPw" type="password" placeholder="비밀번호">
+    <input id="id" placeholder="아이디">
+    <input id="pw" type="password" placeholder="비밀번호">
     <button onclick="login()">로그인</button>
     <button onclick="showRegister()">회원가입</button>
   `;
 }
 
-// 회원가입 기능
+// 회원가입
+function showRegister() {
+  document.getElementById("screen").innerHTML = `
+    <h3>회원가입</h3>
+    <input id="rid" placeholder="아이디">
+    <input id="rpw" type="password" placeholder="비밀번호">
+    <button onclick="register()">가입</button>
+    <button onclick="showLogin()">← 로그인</button>
+  `;
+}
+
 function register() {
-  let id = document.getElementById("regId").value;
-  let pw = document.getElementById("regPw").value;
+  let id = rid.value;
+  let pw = rpw.value;
 
   let users = JSON.parse(localStorage.getItem("users")) || [];
-
   if (users.find(u => u.id === id)) {
-    alert("이미 존재하는 아이디");
+    alert("이미 있음");
     return;
   }
 
   users.push({id, pw});
   localStorage.setItem("users", JSON.stringify(users));
-
-  alert("회원가입 성공!");
+  alert("가입 완료!");
   showLogin();
 }
 
-// 로그인 기능
 function login() {
-  let id = document.getElementById("loginId").value;
-  let pw = document.getElementById("loginPw").value;
-
   let users = JSON.parse(localStorage.getItem("users")) || [];
+  let user = users.find(u => u.id === id.value && u.pw === pw.value);
 
-  let user = users.find(u => u.id === id && u.pw === pw);
+  if (!user) return alert("실패");
 
-  if (!user) {
-    alert("로그인 실패");
-    return;
-  }
-
-  currentUser = id;
+  currentUser = user.id;
   showHome();
 }
 
-// 🏠 홈 화면
+// 🏠 홈
 function showHome() {
-  document.getElementById("screen").innerHTML = `
-    <h3>${currentUser}님 환영합니다 👋</h3>
-
+  screen.innerHTML = `
+    <h3>${currentUser}님 👋</h3>
     <div class="card" onclick="showRecommend()">😴 수면 추천</div>
-    <div class="card" onclick="showMusic()">🎵 음악 선택</div>
+    <div class="card" onclick="showMusic()">🎵 음악</div>
     <div class="card" onclick="showConsult()">🧠 상담</div>
     <div class="card" onclick="showHistory()">📊 기록</div>
-
     <button onclick="logout()">로그아웃</button>
   `;
 }
 
-// 🔓 로그아웃
 function logout() {
   currentUser = null;
   stop();
@@ -151,23 +134,22 @@ function logout() {
 
 // 😴 추천
 function showRecommend() {
-  document.getElementById("screen").innerHTML = `
-    <h3>상태 선택</h3>
+  screen.innerHTML = `
     <div class="card" onclick="recommend('stress')">스트레스</div>
-    <div class="card" onclick="recommend('tired')">피곤함</div>
+    <div class="card" onclick="recommend('tired')">피곤</div>
     <div class="card" onclick="recommend('normal')">보통</div>
-    <button onclick="showHome()">← 홈</button>
+    <button onclick="showHome()">←</button>
   `;
 }
 
-function recommend(state) {
-  let music = state === "stress" ? "피아노" : state === "tired" ? "빗소리" : "로파이";
-  let habit = state === "stress" ? "명상" : state === "tired" ? "스트레칭" : "폰 끄기";
+function recommend(s) {
+  let m = s=="stress"?"피아노":s=="tired"?"빗소리":"로파이";
+  let h = s=="stress"?"명상":"스트레칭";
 
-  saveData(state, music, habit);
+  save(s,m,h);
 
-  document.getElementById("screen").innerHTML = `
-    <p>${music} / ${habit}</p>
+  screen.innerHTML = `
+    <p>${m} / ${h}</p>
     <button onclick="playDefault()">재생</button>
     <button onclick="showHome()">홈</button>
   `;
@@ -175,74 +157,102 @@ function recommend(state) {
 
 // 🎵 음악
 function showMusic() {
-  document.getElementById("screen").innerHTML = `
+  screen.innerHTML = `
     <select id="music">
       <option value="1">피아노</option>
       <option value="2">빗소리</option>
       <option value="3">로파이</option>
     </select>
-    <button onclick="playSelect()">재생</button>
+    <button onclick="playMusic()">재생</button>
     <button onclick="stop()">정지</button>
-    <button onclick="showHome()">← 홈</button>
+    <button onclick="showHome()">←</button>
   `;
 }
 
-function playSelect() {
-  let v = document.getElementById("music").value;
-  let url = v==1?"https://www.soundhelix.com/examples/mp3/Song-1.mp3":
-            v==2?"https://www.soundhelix.com/examples/mp3/Song-2.mp3":
-            "https://www.soundhelix.com/examples/mp3/Song-3.mp3";
+function playMusic() {
+  let v = music.value;
+  let url = v==1?"https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3":
+            v==2?"https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3":
+            "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3";
   play(url);
 }
 
-// 🧠 상담
+// 🧠 상담 (최강 버전)
 function showConsult() {
-  document.getElementById("screen").innerHTML = `
-    <textarea id="text"></textarea>
+  screen.innerHTML = `
+    <textarea id="text" placeholder="고민 입력"></textarea>
     <button onclick="consult()">상담</button>
     <div id="res"></div>
-    <button onclick="showHome()">← 홈</button>
+    <button onclick="showHome()">←</button>
   `;
 }
 
 function consult() {
-  let t = document.getElementById("text").value;
-  let r = t.includes("스트레스") ? "쉬어보세요 🌿" :
-          t.includes("잠") ? "폰 줄이세요 📵" :
-          "편안한 음악 추천 😌";
+  let t = text.value;
+  let res = [];
+
+  if ((t.includes("스트레스")||t.includes("힘들")) && t.includes("잠")) {
+    res=["스트레스 때문에 잠이 안 오죠 😔","생각을 내려놓고 쉬어보세요 🌙"];
+  }
+  else if (t.includes("스트레스")) {
+    res=["쉬어도 괜찮아요 🌿","깊게 호흡해보세요 🧘"];
+  }
+  else if (t.includes("잠")) {
+    res=["폰 멀리하세요 📵","규칙적인 수면 중요 ⏰"];
+  }
+  else if (t.includes("화")) {
+    res=["자연스러운 감정이에요 😌","잠시 쉬어보세요"];
+  }
+  else if (t.includes("슬프")||t.includes("우울")) {
+    res=["괜찮아요 🤍","혼자가 아니에요 💙"];
+  }
+  else if (t.includes("불안")) {
+    res=["지금에 집중하세요 🌱","천천히 호흡하세요"];
+  }
+  else if (t.includes("시험")) {
+    res=["노력은 배신 안해요 💪","조금씩 해요 📚"];
+  }
+  else if (t.includes("친구")) {
+    res=["시간이 해결해요 ⏳","대화가 중요해요 💬"];
+  }
+  else {
+    res=["오늘도 잘했어요 👍","편히 쉬세요 😌"];
+  }
+
+  let r = res[Math.floor(Math.random()*res.length)];
   document.getElementById("res").innerHTML = r;
 }
 
 // 📊 기록
-function saveData(state, music, habit) {
-  let all = JSON.parse(localStorage.getItem("records")) || {};
-  if (!all[currentUser]) all[currentUser] = [];
-  all[currentUser].push({state, music, habit, time:new Date().toLocaleString()});
-  localStorage.setItem("records", JSON.stringify(all));
+function save(s,m,h) {
+  let all = JSON.parse(localStorage.getItem("rec"))||{};
+  if (!all[currentUser]) all[currentUser]=[];
+  all[currentUser].push({s,m,h,time:new Date().toLocaleString()});
+  localStorage.setItem("rec",JSON.stringify(all));
 }
 
 function showHistory() {
-  let all = JSON.parse(localStorage.getItem("records")) || {};
-  let data = all[currentUser] || [];
+  let all = JSON.parse(localStorage.getItem("rec"))||{};
+  let d = all[currentUser]||[];
 
-  let html = "<h3>기록</h3>";
-  data.forEach(d => {
-    html += `<div class="card">${d.state}/${d.music}/${d.time}</div>`;
+  let html="<h3>기록</h3>";
+  d.forEach(x=>{
+    html+=`<div class="card">${x.s}/${x.m}/${x.time}</div>`;
   });
 
-  document.getElementById("screen").innerHTML = html + `<button onclick="showHome()">← 홈</button>`;
+  screen.innerHTML = html+`<button onclick="showHome()">←</button>`;
 }
 
 // 🎵 재생
 function play(url) {
   if (audio) audio.pause();
-  audio = new Audio(url);
-  audio.loop = true;
+  audio=new Audio(url);
+  audio.loop=true;
   audio.play();
 }
 
 function playDefault() {
-  play("https://www.soundhelix.com/examples/mp3/Song-1.mp3");
+  play("https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3");
 }
 
 function stop() {
@@ -250,5 +260,7 @@ function stop() {
 }
 </script>
 
+</body>
+</html>
 </body>
 </html>
