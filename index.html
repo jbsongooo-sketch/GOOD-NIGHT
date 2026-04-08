@@ -1,337 +1,254 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>불면증 해소기</title>
-  <style>
-    :root {
-      --bg: #0f172a;
-      --panel: #1e293b;
-      --card: #334155;
-      --card-hover: #475569;
-      --accent: #38bdf8;
-      --text: #e2e8f0;
-      --muted: #94a3b8;
-      --border: rgba(148, 163, 184, 0.2);
-    }
+<meta charset="UTF-8">
+<title>불면증 해소기</title>
 
-    * {
-      box-sizing: border-box;
-    }
+<style>
+body {
+  margin: 0;
+  font-family: Arial;
+  background: #0f172a;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+}
 
-    body {
-      margin: 0;
-      min-height: 100vh;
-      font-family: "Segoe UI", sans-serif;
-      background:
-        radial-gradient(circle at top, rgba(56, 189, 248, 0.15), transparent 30%),
-        var(--bg);
-      color: var(--text);
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      padding: 24px;
-    }
+.app {
+  width: 340px;
+  height: 620px;
+  background: #1e293b;
+  border-radius: 25px;
+  padding: 20px;
+  color: white;
+  overflow-y: auto;
+}
 
-    .app {
-      width: min(100%, 360px);
-      min-height: 640px;
-      background: var(--panel);
-      border: 1px solid var(--border);
-      border-radius: 28px;
-      padding: 24px;
-      box-shadow: 0 24px 60px rgba(15, 23, 42, 0.45);
-    }
+.card {
+  background: #334155;
+  padding: 12px;
+  margin: 8px 0;
+  border-radius: 12px;
+  cursor: pointer;
+}
 
-    h1, h2, h3, p {
-      margin-top: 0;
-    }
+button {
+  margin-top: 10px;
+  padding: 8px;
+  border: none;
+  border-radius: 10px;
+  background: #38bdf8;
+  cursor: pointer;
+}
 
-    h1 {
-      font-size: 28px;
-      margin-bottom: 8px;
-    }
+input, textarea, select {
+  width: 90%;
+  margin-top: 10px;
+  padding: 6px;
+  border-radius: 8px;
+  border: none;
+}
+</style>
 
-    .subtitle {
-      color: var(--muted);
-      margin-bottom: 24px;
-      line-height: 1.5;
-    }
-
-    .card {
-      background: var(--card);
-      padding: 16px;
-      margin: 10px 0;
-      border-radius: 16px;
-      cursor: pointer;
-      transition: background 0.2s ease, transform 0.2s ease;
-    }
-
-    .card:hover {
-      background: var(--card-hover);
-      transform: translateY(-1px);
-    }
-
-    .result,
-    .history {
-      margin-top: 24px;
-      padding-top: 20px;
-      border-top: 1px solid var(--border);
-    }
-
-    .summary {
-      background: rgba(56, 189, 248, 0.08);
-      border: 1px solid rgba(56, 189, 248, 0.18);
-      border-radius: 16px;
-      padding: 16px;
-      margin-bottom: 16px;
-      line-height: 1.6;
-    }
-
-    .buttons {
-      display: flex;
-      gap: 8px;
-      flex-wrap: wrap;
-      margin: 16px 0;
-    }
-
-    button {
-      border: none;
-      border-radius: 12px;
-      padding: 10px 14px;
-      background: var(--accent);
-      color: #082f49;
-      font-weight: 700;
-      cursor: pointer;
-    }
-
-    button.secondary {
-      background: #cbd5e1;
-      color: #0f172a;
-    }
-
-    .timer-box {
-      display: flex;
-      gap: 8px;
-      margin: 12px 0 16px;
-    }
-
-    input {
-      width: 100%;
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 10px 12px;
-      background: #0f172a;
-      color: var(--text);
-    }
-
-    .status {
-      min-height: 24px;
-      color: var(--muted);
-      font-size: 14px;
-      margin-top: 10px;
-    }
-
-    .history-item {
-      background: rgba(15, 23, 42, 0.45);
-      border: 1px solid var(--border);
-      border-radius: 14px;
-      padding: 12px;
-      margin-bottom: 10px;
-    }
-
-    .history-item strong {
-      display: block;
-      margin-bottom: 6px;
-    }
-
-    .history-item small {
-      color: var(--muted);
-    }
-  </style>
 </head>
 <body>
-  <div class="app">
-    <h1>오늘 밤 수면 도우미</h1>
-    <p class="subtitle">현재 컨디션에 맞는 음악과 습관을 추천하고, 최근 추천 기록을 DB에 저장합니다.</p>
 
-    <div id="main">
-      <div class="card" onclick="recommend('stress')">지금 스트레스가 많아요</div>
-      <div class="card" onclick="recommend('tired')">몸이 많이 지쳐 있어요</div>
-      <div class="card" onclick="recommend('normal')">그냥 편안하게 자고 싶어요</div>
-    </div>
+<div class="app">
 
-    <div id="result" class="result"></div>
+<h2>🌙 불면증 해소기</h2>
 
-    <div class="history">
-      <h3>최근 추천 기록</h3>
-      <div id="historyList">불러오는 중...</div>
-    </div>
-  </div>
+<div id="screen"></div>
 
-  <script>
-    let audio;
-    let sleepTimer;
+</div>
 
-    const recommendations = {
-      stress: {
-        label: "스트레스가 많음",
-        music: "잔잔한 피아노 힐링 음악",
-        habit: "명상 5분 후 조용히 눕기",
-        url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3"
-      },
-      tired: {
-        label: "매우 피곤함",
-        music: "빗소리와 함께 듣는 앰비언트",
-        habit: "가벼운 스트레칭 후 호흡 정리",
-        url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3"
-      },
-      normal: {
-        label: "보통 상태",
-        music: "로파이 재즈 플레이리스트",
-        habit: "휴대폰을 멀리 두고 조명 낮추기",
-        url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3"
-      }
-    };
+<script>
+let currentUser = null;
+let audio;
 
-    function recommend(state) {
-      const selected = recommendations[state];
-      if (!selected) return;
+// 🔐 시작 화면
+showLogin();
 
-      document.getElementById("result").innerHTML = `
-        <h2>추천 결과</h2>
-        <div class="summary">
-          <p><strong>현재 상태</strong>: ${selected.label}</p>
-          <p><strong>추천 음악</strong>: ${selected.music}</p>
-          <p><strong>추천 습관</strong>: ${selected.habit}</p>
-        </div>
+// 회원가입 화면
+function showRegister() {
+  document.getElementById("screen").innerHTML = `
+    <h3>회원가입</h3>
+    <input id="regId" placeholder="아이디">
+    <input id="regPw" type="password" placeholder="비밀번호">
+    <button onclick="register()">가입하기</button>
+    <button onclick="showLogin()">← 로그인</button>
+  `;
+}
 
-        <div class="buttons">
-          <button onclick="play('${selected.url}')">음악 재생</button>
-          <button class="secondary" onclick="stopAudio()">음악 정지</button>
-        </div>
+// 로그인 화면
+function showLogin() {
+  document.getElementById("screen").innerHTML = `
+    <h3>로그인</h3>
+    <input id="loginId" placeholder="아이디">
+    <input id="loginPw" type="password" placeholder="비밀번호">
+    <button onclick="login()">로그인</button>
+    <button onclick="showRegister()">회원가입</button>
+  `;
+}
 
-        <p>수면 타이머(분)</p>
-        <div class="timer-box">
-          <input type="number" id="time" placeholder="10" min="1">
-          <button onclick="timer()">설정</button>
-        </div>
+// 회원가입 기능
+function register() {
+  let id = document.getElementById("regId").value;
+  let pw = document.getElementById("regPw").value;
 
-        <div class="buttons">
-          <button onclick="saveRecommendation('${state}')">추천 저장</button>
-          <button class="secondary" onclick="back()">다시 선택</button>
-        </div>
+  let users = JSON.parse(localStorage.getItem("users")) || [];
 
-        <div id="status" class="status"></div>
-      `;
-    }
+  if (users.find(u => u.id === id)) {
+    alert("이미 존재하는 아이디");
+    return;
+  }
 
-    function play(url) {
-      if (audio) audio.pause();
-      audio = new Audio(url);
-      audio.loop = true;
-      audio.volume = 0.5;
-      audio.play();
-    }
+  users.push({id, pw});
+  localStorage.setItem("users", JSON.stringify(users));
 
-    function stopAudio() {
-      if (audio) audio.pause();
-      if (sleepTimer) {
-        clearTimeout(sleepTimer);
-        sleepTimer = null;
-      }
-    }
+  alert("회원가입 성공!");
+  showLogin();
+}
 
-    function timer() {
-      const t = Number(document.getElementById("time").value);
-      if (!audio || !t) return;
+// 로그인 기능
+function login() {
+  let id = document.getElementById("loginId").value;
+  let pw = document.getElementById("loginPw").value;
 
-      if (sleepTimer) clearTimeout(sleepTimer);
+  let users = JSON.parse(localStorage.getItem("users")) || [];
 
-      sleepTimer = setTimeout(() => {
-        audio.pause();
-        alert("설정한 시간이 지나 음악을 멈췄어요.");
-      }, t * 60000);
+  let user = users.find(u => u.id === id && u.pw === pw);
 
-      setStatus(`${t}분 뒤에 음악을 멈추도록 설정했어요.`);
-    }
+  if (!user) {
+    alert("로그인 실패");
+    return;
+  }
 
-    function back() {
-      stopAudio();
-      document.getElementById("result").innerHTML = "";
-    }
+  currentUser = id;
+  showHome();
+}
 
-    function setStatus(message, isError = false) {
-      const status = document.getElementById("status");
-      if (!status) return;
-      status.textContent = message;
-      status.style.color = isError ? "#fca5a5" : "#94a3b8";
-    }
+// 🏠 홈 화면
+function showHome() {
+  document.getElementById("screen").innerHTML = `
+    <h3>${currentUser}님 환영합니다 👋</h3>
 
-    async function saveRecommendation(state) {
-      const selected = recommendations[state];
-      if (!selected) return;
+    <div class="card" onclick="showRecommend()">😴 수면 추천</div>
+    <div class="card" onclick="showMusic()">🎵 음악 선택</div>
+    <div class="card" onclick="showConsult()">🧠 상담</div>
+    <div class="card" onclick="showHistory()">📊 기록</div>
 
-      try {
-        setStatus("DB에 저장하는 중...");
-        const response = await fetch("/api/recommendations", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            state,
-            stateLabel: selected.label,
-            music: selected.music,
-            habit: selected.habit
-          })
-        });
+    <button onclick="logout()">로그아웃</button>
+  `;
+}
 
-        if (!response.ok) {
-          throw new Error("저장 요청 실패");
-        }
+// 🔓 로그아웃
+function logout() {
+  currentUser = null;
+  stop();
+  showLogin();
+}
 
-        setStatus("추천 결과를 DB에 저장했어요.");
-        loadHistory();
-      } catch (error) {
-        setStatus("저장에 실패했어요. 서버가 실행 중인지 확인해주세요.", true);
-      }
-    }
+// 😴 추천
+function showRecommend() {
+  document.getElementById("screen").innerHTML = `
+    <h3>상태 선택</h3>
+    <div class="card" onclick="recommend('stress')">스트레스</div>
+    <div class="card" onclick="recommend('tired')">피곤함</div>
+    <div class="card" onclick="recommend('normal')">보통</div>
+    <button onclick="showHome()">← 홈</button>
+  `;
+}
 
-    async function loadHistory() {
-      const historyList = document.getElementById("historyList");
+function recommend(state) {
+  let music = state === "stress" ? "피아노" : state === "tired" ? "빗소리" : "로파이";
+  let habit = state === "stress" ? "명상" : state === "tired" ? "스트레칭" : "폰 끄기";
 
-      try {
-        const response = await fetch("/api/recommendations");
-        if (!response.ok) {
-          throw new Error("조회 실패");
-        }
+  saveData(state, music, habit);
 
-        const items = await response.json();
-        if (!items.length) {
-          historyList.textContent = "아직 저장된 추천 기록이 없어요.";
-          return;
-        }
+  document.getElementById("screen").innerHTML = `
+    <p>${music} / ${habit}</p>
+    <button onclick="playDefault()">재생</button>
+    <button onclick="showHome()">홈</button>
+  `;
+}
 
-        historyList.innerHTML = items.map((item) => `
-          <div class="history-item">
-            <strong>${item.state_label}</strong>
-            <div>${item.music}</div>
-            <div>${item.habit}</div>
-            <small>${formatDate(item.created_at)}</small>
-          </div>
-        `).join("");
-      } catch (error) {
-        historyList.textContent = "기록을 불러오지 못했어요. 서버를 먼저 실행해주세요.";
-      }
-    }
+// 🎵 음악
+function showMusic() {
+  document.getElementById("screen").innerHTML = `
+    <select id="music">
+      <option value="1">피아노</option>
+      <option value="2">빗소리</option>
+      <option value="3">로파이</option>
+    </select>
+    <button onclick="playSelect()">재생</button>
+    <button onclick="stop()">정지</button>
+    <button onclick="showHome()">← 홈</button>
+  `;
+}
 
-    function formatDate(value) {
-      const date = new Date(value);
-      if (Number.isNaN(date.getTime())) return value;
-      return date.toLocaleString("ko-KR");
-    }
+function playSelect() {
+  let v = document.getElementById("music").value;
+  let url = v==1?"https://www.soundhelix.com/examples/mp3/Song-1.mp3":
+            v==2?"https://www.soundhelix.com/examples/mp3/Song-2.mp3":
+            "https://www.soundhelix.com/examples/mp3/Song-3.mp3";
+  play(url);
+}
 
-    loadHistory();
-  </script>
+// 🧠 상담
+function showConsult() {
+  document.getElementById("screen").innerHTML = `
+    <textarea id="text"></textarea>
+    <button onclick="consult()">상담</button>
+    <div id="res"></div>
+    <button onclick="showHome()">← 홈</button>
+  `;
+}
+
+function consult() {
+  let t = document.getElementById("text").value;
+  let r = t.includes("스트레스") ? "쉬어보세요 🌿" :
+          t.includes("잠") ? "폰 줄이세요 📵" :
+          "편안한 음악 추천 😌";
+  document.getElementById("res").innerHTML = r;
+}
+
+// 📊 기록
+function saveData(state, music, habit) {
+  let all = JSON.parse(localStorage.getItem("records")) || {};
+  if (!all[currentUser]) all[currentUser] = [];
+  all[currentUser].push({state, music, habit, time:new Date().toLocaleString()});
+  localStorage.setItem("records", JSON.stringify(all));
+}
+
+function showHistory() {
+  let all = JSON.parse(localStorage.getItem("records")) || {};
+  let data = all[currentUser] || [];
+
+  let html = "<h3>기록</h3>";
+  data.forEach(d => {
+    html += `<div class="card">${d.state}/${d.music}/${d.time}</div>`;
+  });
+
+  document.getElementById("screen").innerHTML = html + `<button onclick="showHome()">← 홈</button>`;
+}
+
+// 🎵 재생
+function play(url) {
+  if (audio) audio.pause();
+  audio = new Audio(url);
+  audio.loop = true;
+  audio.play();
+}
+
+function playDefault() {
+  play("https://www.soundhelix.com/examples/mp3/Song-1.mp3");
+}
+
+function stop() {
+  if (audio) audio.pause();
+}
+</script>
+
 </body>
 </html>
